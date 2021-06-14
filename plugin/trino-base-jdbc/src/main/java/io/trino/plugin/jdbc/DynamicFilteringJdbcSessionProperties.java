@@ -15,6 +15,7 @@
 package io.trino.plugin.jdbc;
 
 import com.google.common.collect.ImmutableList;
+import io.airlift.units.Duration;
 import io.trino.plugin.base.session.SessionPropertiesProvider;
 import io.trino.spi.connector.ConnectorSession;
 import io.trino.spi.session.PropertyMetadata;
@@ -23,12 +24,12 @@ import javax.inject.Inject;
 
 import java.util.List;
 
-import static io.trino.spi.session.PropertyMetadata.longProperty;
+import static io.trino.plugin.base.session.PropertyMetadataUtil.durationProperty;
 
 public class DynamicFilteringJdbcSessionProperties
         implements SessionPropertiesProvider
 {
-    public static final String DYNAMIC_FILTERING_TIMEOUT = "dynamic_filtering_timeout";
+    private static final String DYNAMIC_FILTERING_WAIT_TIMEOUT = "dynamic_filtering_wait_timeout";
 
     private final List<PropertyMetadata<?>> properties;
 
@@ -36,16 +37,16 @@ public class DynamicFilteringJdbcSessionProperties
     public DynamicFilteringJdbcSessionProperties(DynamicFilteringJdbcConfig config)
     {
         properties = ImmutableList.of(
-                longProperty(
-                        DYNAMIC_FILTERING_TIMEOUT,
-                        "Determins dynamic filtering waiting timeout",
-                        0L,
+                durationProperty(
+                        DYNAMIC_FILTERING_WAIT_TIMEOUT,
+                        "Duration to wait for completion of dynamic filters",
+                        config.getDynamicFilteringWaitTimeout(),
                         false));
     }
 
-    public static Long getDynamicFilteringTimeout(ConnectorSession session)
+    public static Duration getDynamicFilteringWaitTimeout(ConnectorSession session)
     {
-        return session.getProperty(DYNAMIC_FILTERING_TIMEOUT, Long.class);
+        return session.getProperty(DYNAMIC_FILTERING_WAIT_TIMEOUT, Duration.class);
     }
 
     @Override

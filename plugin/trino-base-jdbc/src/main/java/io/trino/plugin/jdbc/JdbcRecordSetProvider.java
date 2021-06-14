@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 import static com.google.common.base.Verify.verify;
-import static io.trino.plugin.jdbc.DynamicFilteringJdbcSessionProperties.getDynamicFilteringTimeout;
+import static io.trino.plugin.jdbc.DynamicFilteringJdbcSessionProperties.getDynamicFilteringWaitTimeout;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
@@ -50,22 +50,21 @@ public class JdbcRecordSetProvider
     @Override
     public RecordSet getRecordSet(ConnectorTransactionHandle transaction, ConnectorSession session, ConnectorSplit split, ConnectorTableHandle table, List<? extends ColumnHandle> columns, DynamicFilter dynamicFilter)
     {
-        Long timeoutMillis = getDynamicFilteringTimeout(session);
+        long timeoutMillis = getDynamicFilteringWaitTimeout(session).toMillis();
 
         // no time for further narrow down or done already
         if (timeoutMillis == 0 || !dynamicFilter.isAwaitable()) {
             JdbcTableHandle handle = ((JdbcTableHandle) table).withConstraint(dynamicFilter.getCurrentPredicate());
             return getRecordSet(transaction, session, split, handle, columns);
         }
-        else {
-            try {
-                dynamicFilter.isBlocked().get(timeoutMillis, MILLISECONDS);
-                JdbcTableHandle handle = ((JdbcTableHandle) table).withConstraint(dynamicFilter.getCurrentPredicate());
-                return getRecordSet(transaction, session, split, handle, columns);
-            }
-            catch (Exception e) {
-                return getRecordSet(transaction, session, split, table, columns);
-            }
+
+        try {
+            dynamicFilter.isBlocked().get(timeoutMillis, MILLISECONDS);
+            JdbcTableHandle handle = ((JdbcTableHandle) table).withConstraint(dynamicFilter.getCurrentPredicate());
+            return getRecordSet(transaction, session, split, handle, columns);
+        }
+        catch (Exception e) {
+            return getRecordSet(transaction, session, split, table, columns);
         }
     }
 

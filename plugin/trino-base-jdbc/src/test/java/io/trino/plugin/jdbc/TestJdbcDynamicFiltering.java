@@ -36,7 +36,6 @@ import java.util.concurrent.ThreadLocalRandom;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static io.trino.SystemSessionProperties.JOIN_DISTRIBUTION_TYPE;
 import static io.trino.SystemSessionProperties.JOIN_REORDERING_STRATEGY;
-import static io.trino.plugin.jdbc.DynamicFilteringJdbcSessionProperties.DYNAMIC_FILTERING_TIMEOUT;
 import static io.trino.sql.analyzer.FeaturesConfig.JoinDistributionType.BROADCAST;
 import static io.trino.sql.analyzer.FeaturesConfig.JoinDistributionType.PARTITIONED;
 import static io.trino.sql.analyzer.FeaturesConfig.JoinReorderingStrategy.NONE;
@@ -49,13 +48,24 @@ public class TestJdbcDynamicFiltering
 {
     private static final int LINEITEM_COUNT = 60175;
 
+    private static List<Integer> getOperatorRowsRead(DistributedQueryRunner runner, QueryId queryId)
+    {
+        QueryStats stats = runner.getCoordinator().getQueryManager().getFullQueryInfo(queryId).getQueryStats();
+        return stats.getOperatorSummaries()
+                .stream()
+                .filter(summary -> summary.getOperatorType().equals("ScanFilterAndProjectOperator"))
+                .map(OperatorStats::getInputPositions)
+                .map(Math::toIntExact)
+                .collect(toImmutableList());
+    }
+
     @Override
     protected QueryRunner createQueryRunner()
             throws Exception
     {
         Map<String, String> properties = ImmutableMap.<String, String>builder()
                 .put("connection-url", format("jdbc:h2:mem:test%s;DB_CLOSE_DELAY=-1", System.nanoTime() + ThreadLocalRandom.current().nextLong()))
-                .put(DYNAMIC_FILTERING_TIMEOUT, "30000")
+                .put("dynamic-filtering.wait-timeout", "30s")
                 .build();
         return H2QueryRunner.createH2QueryRunner(List.of(TpchTable.LINE_ITEM, TpchTable.ORDERS, TpchTable.PART, TpchTable.CUSTOMER), properties);
     }
@@ -212,17 +222,6 @@ public class TestJdbcDynamicFiltering
         return Session.builder(getSession())
                 .setSystemProperty(JOIN_DISTRIBUTION_TYPE, PARTITIONED.name())
                 .build();
-    }
-
-    private static List<Integer> getOperatorRowsRead(DistributedQueryRunner runner, QueryId queryId)
-    {
-        QueryStats stats = runner.getCoordinator().getQueryManager().getFullQueryInfo(queryId).getQueryStats();
-        return stats.getOperatorSummaries()
-                .stream()
-                .filter(summary -> summary.getOperatorType().equals("ScanFilterAndProjectOperator"))
-                .map(OperatorStats::getInputPositions)
-                .map(Math::toIntExact)
-                .collect(toImmutableList());
     }
 
     private void assertQueryResult(@Language("SQL") String sql, Object... expected)

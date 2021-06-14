@@ -16,24 +16,29 @@ package io.trino.plugin.jdbc;
 
 import io.airlift.configuration.Config;
 import io.airlift.configuration.ConfigDescription;
+import io.airlift.units.Duration;
+import io.airlift.units.MinDuration;
 
 import javax.validation.constraints.NotNull;
 
+import java.util.concurrent.TimeUnit;
+
 public class DynamicFilteringJdbcConfig
 {
-    private Long dynamicFilteringTimeout = 0L;
+    private Duration dynamicFilteringWaitTimeout = new Duration(0, TimeUnit.MINUTES);
 
     @NotNull
-    public Long getDynamicFilteringTimeout()
+    @MinDuration("0ms")
+    public Duration getDynamicFilteringWaitTimeout()
     {
-        return dynamicFilteringTimeout;
+        return dynamicFilteringWaitTimeout;
     }
 
-    @Config("dynamic_filtering_timeout")
-    @ConfigDescription("Determins dynamic filtering waiting timeout")
-    public DynamicFilteringJdbcConfig setDynamicFilteringTimeout(Long timeout)
+    @Config("dynamic-filtering.wait-timeout")
+    @ConfigDescription("Duration to wait for completion of dynamic filters")
+    public DynamicFilteringJdbcConfig setDynamicFilteringWaitTimeout(Duration timeout)
     {
-        this.dynamicFilteringTimeout = timeout;
+        this.dynamicFilteringWaitTimeout = timeout;
         return this;
     }
 }
