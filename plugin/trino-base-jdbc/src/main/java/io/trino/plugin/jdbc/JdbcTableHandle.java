@@ -104,9 +104,8 @@ public final class JdbcTableHandle
         if (newDomain == constraint) {
             return this;
         }
-        else {
-            return new JdbcTableHandle(relationHandle, newDomain, sortOrder, limit, columns, otherReferencedTables, nextSyntheticColumnId);
-        }
+
+        return new JdbcTableHandle(relationHandle, newDomain, sortOrder, limit, columns, otherReferencedTables, nextSyntheticColumnId);
     }
 
     /**
