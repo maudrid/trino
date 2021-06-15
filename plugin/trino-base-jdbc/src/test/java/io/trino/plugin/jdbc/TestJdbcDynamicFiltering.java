@@ -65,6 +65,7 @@ public class TestJdbcDynamicFiltering
     {
         Map<String, String> properties = ImmutableMap.<String, String>builder()
                 .put("connection-url", format("jdbc:h2:mem:test%s;DB_CLOSE_DELAY=-1", System.nanoTime() + ThreadLocalRandom.current().nextLong()))
+                .put("enable-dynamic-filtering", "true")
                 .put("dynamic-filtering.wait-timeout", "30s")
                 .build();
         return H2QueryRunner.createH2QueryRunner(List.of(TpchTable.LINE_ITEM, TpchTable.ORDERS, TpchTable.PART, TpchTable.CUSTOMER), properties);
