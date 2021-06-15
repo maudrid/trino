@@ -30,7 +30,7 @@ import static io.trino.spi.session.PropertyMetadata.booleanProperty;
 public class DynamicFilteringJdbcSessionProperties
         implements SessionPropertiesProvider
 {
-    private static final String ENABLE_DYNAMIC_FILTERING = "dynamic_filtering_enabled";
+    private static final String DYNAMIC_FILTERING_ENABLED = "dynamic_filtering_enabled";
     private static final String DYNAMIC_FILTERING_WAIT_TIMEOUT = "dynamic_filtering_wait_timeout";
 
     private final List<PropertyMetadata<?>> properties;
@@ -40,7 +40,7 @@ public class DynamicFilteringJdbcSessionProperties
     {
         properties = ImmutableList.of(
                 booleanProperty(
-                        ENABLE_DYNAMIC_FILTERING,
+                        DYNAMIC_FILTERING_ENABLED,
                         "If dynamic filtering is enabled",
                         config.isEnableDynamicFiltering(),
                         false),
@@ -53,7 +53,7 @@ public class DynamicFilteringJdbcSessionProperties
 
     public static boolean isEnableDynamicFiltering(ConnectorSession session)
     {
-        return session.getProperty(ENABLE_DYNAMIC_FILTERING, Boolean.class);
+        return session.getProperty(DYNAMIC_FILTERING_ENABLED, Boolean.class);
     }
 
     public static Duration getDynamicFilteringWaitTimeout(ConnectorSession session)
