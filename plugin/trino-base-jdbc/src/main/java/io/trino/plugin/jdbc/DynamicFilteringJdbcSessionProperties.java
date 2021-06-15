@@ -30,7 +30,7 @@ import static io.trino.spi.session.PropertyMetadata.booleanProperty;
 public class DynamicFilteringJdbcSessionProperties
         implements SessionPropertiesProvider
 {
-    private static final String ENABLE_DYNAMIC_FILTERING = "enable_dynamic_filtering";
+    private static final String ENABLE_DYNAMIC_FILTERING = "dynamic_filtering_enabled";
     private static final String DYNAMIC_FILTERING_WAIT_TIMEOUT = "dynamic_filtering_wait_timeout";
 
     private final List<PropertyMetadata<?>> properties;

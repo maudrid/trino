@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 
 public class DynamicFilteringJdbcConfig
 {
-    private boolean enableDynamicFiltering = false;
+    private boolean enableDynamicFiltering;
     private Duration dynamicFilteringWaitTimeout = new Duration(0, TimeUnit.MINUTES);
 
     public boolean isEnableDynamicFiltering()
@@ -33,7 +33,7 @@ public class DynamicFilteringJdbcConfig
         return enableDynamicFiltering;
     }
 
-    @Config("enable-dynamic-filtering")
+    @Config("dynamic-filtering.enabled")
     public DynamicFilteringJdbcConfig setEnableDynamicFiltering(boolean enableDynamicFiltering)
     {
         this.enableDynamicFiltering = enableDynamicFiltering;
