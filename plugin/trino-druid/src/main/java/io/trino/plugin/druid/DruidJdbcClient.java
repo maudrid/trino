@@ -33,6 +33,7 @@ import io.trino.spi.TrinoException;
 import io.trino.spi.connector.ConnectorSession;
 import io.trino.spi.connector.ConnectorTableMetadata;
 import io.trino.spi.connector.SchemaTableName;
+import io.trino.spi.type.TimestampType;
 import io.trino.spi.type.Type;
 
 import javax.inject.Inject;
@@ -56,9 +57,11 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static io.trino.plugin.jdbc.JdbcErrorCode.JDBC_ERROR;
 import static io.trino.plugin.jdbc.StandardColumnMappings.defaultVarcharColumnMapping;
+import static io.trino.plugin.jdbc.StandardColumnMappings.timestampColumnMappingUsingSqlTimestampWithRounding;
 import static io.trino.plugin.jdbc.StandardColumnMappings.varcharColumnMapping;
 import static io.trino.spi.StandardErrorCode.NOT_SUPPORTED;
 import static io.trino.spi.type.VarcharType.createUnboundedVarcharType;
+import static io.trino.spi.type.TimestampType.createTimestampType;
 
 public class DruidJdbcClient
         extends BaseJdbcClient
@@ -148,6 +151,10 @@ public class DruidJdbcClient
                     return Optional.of(varcharColumnMapping(createUnboundedVarcharType(), true));
                 }
                 return Optional.of(defaultVarcharColumnMapping(columnSize, true));
+            case Types.TIMESTAMP:
+                TimestampType timestampType = createTimestampType(3);
+                // TODO: use {@link #timestampColumnMapping} when https://issues.apache.org/jira/browse/CALCITE-1630 gets resolved
+                return Optional.of(timestampColumnMappingUsingSqlTimestampWithRounding(timestampType));
         }
         // TODO implement proper type mapping
         return legacyColumnMapping(session, connection, typeHandle);
