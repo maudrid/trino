@@ -60,18 +60,18 @@ import static io.trino.plugin.jdbc.StandardColumnMappings.defaultVarcharColumnMa
 import static io.trino.plugin.jdbc.StandardColumnMappings.timestampColumnMappingUsingSqlTimestampWithRounding;
 import static io.trino.plugin.jdbc.StandardColumnMappings.varcharColumnMapping;
 import static io.trino.spi.StandardErrorCode.NOT_SUPPORTED;
-import static io.trino.spi.type.VarcharType.createUnboundedVarcharType;
 import static io.trino.spi.type.TimestampType.createTimestampType;
+import static io.trino.spi.type.VarcharType.createUnboundedVarcharType;
 
 public class DruidJdbcClient
         extends BaseJdbcClient
 {
+    // All the datasources in Druid are created under schema "druid"
+    public static final String DRUID_SCHEMA = "druid";
     // Druid maintains its datasources related metadata by setting the catalog name as "druid"
     // Note that while a user may name the catalog name as something else, metadata queries made
     // to druid will always have the TABLE_CATALOG set to DRUID_CATALOG
     private static final String DRUID_CATALOG = "druid";
-    // All the datasources in Druid are created under schema "druid"
-    public static final String DRUID_SCHEMA = "druid";
 
     @Inject
     public DruidJdbcClient(BaseJdbcConfig config, ConnectionFactory connectionFactory, IdentifierMapping identifierMapping)
