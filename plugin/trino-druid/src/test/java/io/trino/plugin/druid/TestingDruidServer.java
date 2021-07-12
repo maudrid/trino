@@ -27,6 +27,7 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.startupcheck.IsRunningStartupCheckStrategy;
 import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonParser;
 
 import java.io.Closeable;
 import java.io.File;
@@ -238,12 +239,24 @@ public class TestingDruidServer
         middleManager.withCopyFileToContainer(forHostPath(dataFilePath),
                 getMiddleManagerContainerPathForDataFile(dataFilePath));
         String indexTask = Resources.toString(getResource(indexTaskFile), Charset.defaultCharset());
+        ingest(indexTask, datasource);
+    }
 
+    void ingestDataWithoutTaskFile(String indexTask, String dataFilePath, String datasource)
+            throws IOException, InterruptedException
+    {
+        middleManager.withCopyFileToContainer(forHostPath(dataFilePath),
+                getMiddleManagerContainerPathForDataFile(dataFilePath));
+        ingest(indexTask, datasource);
+    }
+
+    void ingest(String indexTask, String datasource) throws IOException, InterruptedException {
         Request.Builder requestBuilder = new Request.Builder();
         requestBuilder.addHeader("content-type", "application/json;charset=utf-8")
                 .url("http://localhost:" + getCoordinatorOverlordPort() + "/druid/indexer/v1/task")
                 .post(RequestBody.create(null, indexTask));
         Request ingestionRequest = requestBuilder.build();
+
         try (Response ignored = httpClient.newCall(ingestionRequest).execute()) {
             Assert.assertTrue(checkDatasourceAvailable(datasource), "Datasource " + datasource + " not loaded");
         }

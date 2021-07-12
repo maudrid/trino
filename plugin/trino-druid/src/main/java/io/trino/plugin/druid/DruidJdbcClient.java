@@ -57,7 +57,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static io.trino.plugin.jdbc.JdbcErrorCode.JDBC_ERROR;
 import static io.trino.plugin.jdbc.StandardColumnMappings.defaultVarcharColumnMapping;
-import static io.trino.plugin.jdbc.StandardColumnMappings.timestampColumnMappingUsingSqlTimestampWithRounding;
+import static io.trino.plugin.jdbc.StandardColumnMappings.timestampColumnMappingUsingSqlTimestampWithRoundingFullPushdown;
 import static io.trino.plugin.jdbc.StandardColumnMappings.varcharColumnMapping;
 import static io.trino.spi.StandardErrorCode.NOT_SUPPORTED;
 import static io.trino.spi.type.TimestampType.createTimestampType;
@@ -154,7 +154,7 @@ public class DruidJdbcClient
             case Types.TIMESTAMP:
                 TimestampType timestampType = createTimestampType(3);
                 // TODO: use {@link #timestampColumnMapping} when https://issues.apache.org/jira/browse/CALCITE-1630 gets resolved
-                return Optional.of(timestampColumnMappingUsingSqlTimestampWithRounding(timestampType));
+                return Optional.of(timestampColumnMappingUsingSqlTimestampWithRoundingFullPushdown(timestampType));
         }
         // TODO implement proper type mapping
         return legacyColumnMapping(session, connection, typeHandle);

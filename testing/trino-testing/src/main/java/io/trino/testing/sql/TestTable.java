@@ -36,25 +36,39 @@ public class TestTable
     private final SqlExecutor sqlExecutor;
     private final String name;
 
-    public TestTable(SqlExecutor sqlExecutor, String namePrefix, String tableDefinition)
-    {
-        this(sqlExecutor, namePrefix, tableDefinition, ImmutableList.of());
+    public TestTable(SqlExecutor sqlExecutor, String namePrefix, String tableDefinition) {
+        this(sqlExecutor, namePrefix, tableDefinition, true);
     }
 
-    public TestTable(SqlExecutor sqlExecutor, String namePrefix, String tableDefinition, List<String> rowsToInsert)
+    public TestTable(SqlExecutor sqlExecutor, String namePrefix, Boolean supportInsertDataByJdbc) {
+        this(sqlExecutor, namePrefix, "dummy table definition", ImmutableList.of(), supportInsertDataByJdbc);
+    }
+
+    public TestTable(SqlExecutor sqlExecutor, String namePrefix, String tableDefinition, Boolean supportInsertDataByJdbc)
+    {
+        this(sqlExecutor, namePrefix, tableDefinition, ImmutableList.of(), supportInsertDataByJdbc);
+    }
+
+    public TestTable(SqlExecutor sqlExecutor, String namePrefix, String tableDefinition, List<String> rowsToInsert) {
+        this(sqlExecutor, namePrefix, tableDefinition, rowsToInsert, true);
+    }
+
+    public TestTable(SqlExecutor sqlExecutor, String namePrefix, String tableDefinition, List<String> rowsToInsert, Boolean supportInsertDataByJdbc)
     {
         this.sqlExecutor = sqlExecutor;
         this.name = namePrefix + "_" + randomTableSuffix();
-        sqlExecutor.execute(format("CREATE TABLE %s %s", name, tableDefinition));
-        try {
-            for (String row : rowsToInsert) {
-                // some databases do not support multi value insert statement
-                sqlExecutor.execute(format("INSERT INTO %s VALUES (%s)", name, row));
+        if(supportInsertDataByJdbc) {
+            sqlExecutor.execute(format("CREATE TABLE %s %s", name, tableDefinition));
+            try {
+                for (String row : rowsToInsert) {
+                    // some databases do not support multi value insert statement
+                    sqlExecutor.execute(format("INSERT INTO %s VALUES (%s)", name, row));
+                }
             }
-        }
-        catch (Exception e) {
-            try (TestTable ignored = this) {
-                throw e;
+            catch (Exception e) {
+                try (TestTable ignored = this) {
+                    throw e;
+                }
             }
         }
     }

@@ -369,4 +369,10 @@ public abstract class BaseDruidConnectorTest
                         "LIMIT 30"))
                 .isNotFullyPushedDown(joinOverTableScans);
     }
+
+    @Test
+    public void testPredicatePushdown()
+    {
+        assertThat(query("SELECT * FROM orders where __time > DATE'1970-01-01'")).isFullyPushedDown();
+    }
 }

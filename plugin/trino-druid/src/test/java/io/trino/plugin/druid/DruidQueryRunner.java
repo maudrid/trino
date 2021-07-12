@@ -70,6 +70,15 @@ public class DruidQueryRunner
         testingDruidServer.ingestData(druidDatasource, getIngestionSpecFileName(druidDatasource), tsvFileLocation);
     }
 
+    public static void copyAndIngestTpchData(MaterializedResult rows, TestingDruidServer testingDruidServer,
+            String sourceDatasource, String targetDatasource)
+            throws IOException, InterruptedException
+    {
+        String tsvFileLocation = format("%s/%s.tsv", testingDruidServer.getHostWorkingDirectory(), targetDatasource);
+        writeDataAsTsv(rows, tsvFileLocation);
+        testingDruidServer.ingestData(targetDatasource, getIngestionSpecFileName(sourceDatasource), tsvFileLocation);
+    }
+
     private static String getIngestionSpecFileName(String datasource)
     {
         return format("druid-tpch-ingest-%s.json", datasource);

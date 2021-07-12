@@ -1,0 +1,37 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package io.trino.plugin.druid.ingestion;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.testng.annotations.Test;
+
+public class TestIndexTaskBuilder
+{
+    @Test
+    public void testIngestionSpec()
+            throws JsonProcessingException
+    {
+        String expected = "{\"type\":\"index\",\"spec\":{\"dataSchema\":{\"dataSource\":\"test_datasource\",\"parser\":{\"type\":\"string\",\"parseSpec\":{\"format\":\"tsv\",\"timestampSpec\":{\"column\":\"dummy_druid_ts\",\"format\":\"auto\"},\"columns\":[\"test_column\",\"dummy_druid_ts\"],\"dimensionsSpec\":{\"dimensions\":[{\"name\":\"test_column\",\"type\":\"varchar\"}]}}},\"granularitySpec\":{\"type\":\"uniform\",\"intervals\":[\"1992-01-02/1998-12-01\"],\"segmentGranularity\":\"year\",\"queryGranularity\":\"day\"}},\"ioConfig\":{\"type\":\"index\",\"firehose\":{\"type\":\"local\",\"baseDir\":\"/opt/druid/var/\",\"filter\":\"test_datasource.tsv\"},\"appendToExisting\":false},\"tuningConfig\":{\"type\":\"index\",\"maxRowsPerSegment\":5000000,\"maxRowsInMemory\":250000,\"segmentWriteOutMediumFactory\":{\"type\":\"offHeapMemory\"}}}}";
+        IndexTaskBuilder builder = new IndexTaskBuilder();
+        builder.setDatasource("test_datasource");
+        builder.addColumn("test_column", "varchar");
+        builder.setTimestampSpec(new TimestampSpec("dummy_druid_ts", "auto"));
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode jsonNode = objectMapper.readValue(builder.build(), JsonNode.class);
+
+        assert (jsonNode.toString().equals(expected));
+    }
+}
