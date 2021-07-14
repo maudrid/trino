@@ -14,14 +14,14 @@
 package io.trino.plugin.druid;
 
 import com.google.common.collect.ImmutableMap;
-import io.trino.spi.type.VarcharType;
 import io.trino.testing.AbstractTestQueryFramework;
 import io.trino.testing.QueryRunner;
 import io.trino.testing.datatype.DataSetup;
-import io.trino.testing.datatype.SqlDataTypeTest;
 import io.trino.testing.sql.TrinoSqlExecutor;
 import org.testng.annotations.Test;
+
 import static io.trino.spi.type.TimestampType.TIMESTAMP_MILLIS;
+import static io.trino.spi.type.VarcharType.VARCHAR;
 
 public class TestDruidTypeMapping
         extends AbstractTestQueryFramework
@@ -38,11 +38,11 @@ public class TestDruidTypeMapping
     }
 
     @Test
-    public void testTimeCoercion()
+    public void testTimestamp()
     {
-        SqlDataTypeTest.create()
-                .addRoundTrip("string", "dummy_varchar", VarcharType.VARCHAR, "dummy_varchar")
-                .addRoundTrip("timestamp(3)", "1970-01-01 00:00:00", TIMESTAMP_MILLIS, "1970-01-01 00:00:00")
+        DruidSqlDataTypeTest.create()
+                .addRoundTrip("timestamp(3)", "2020-01-01 00:00:00.000", TIMESTAMP_MILLIS, "TIMESTAMP '2020-01-01 00:00:00.000'")
+                .addRoundTrip("string", "dummy_varchar", VARCHAR, "cast('dummy_varchar' as varchar)")
                 .execute(getQueryRunner(), trinoCreateAsSelect("time_coercion_test"));
     }
 

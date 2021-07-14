@@ -26,7 +26,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
@@ -51,20 +50,22 @@ public class DruidCreateAndInsertDataSetup
     {
         TestTable testTable = new TestTable(this.sqlExecutor, this.dataSourceNamePrefix, "(col1 TIMESTAMP(3))", false);
         try {
-            createTestTable(testTable, inputs);
-        } catch (Exception e) {
+            ingestData(testTable, inputs);
+        }
+        catch (Exception e) {
             log.error(e);
         }
         return testTable;
     }
 
-    private void createTestTable(TestTable testTable, List<ColumnSetup> inputs) throws Exception
+    private void ingestData(TestTable testTable, List<ColumnSetup> inputs)
+            throws Exception
     {
         IndexTaskBuilder buildler = new IndexTaskBuilder();
         TimestampSpec timestampSpec = getTimestampSpec(inputs);
         buildler.setTimestampSpec(timestampSpec);
         buildler.setDatasource(testTable.getName());
-        for(int index = 0; index < inputs.size() - 1; index ++ ) {
+        for (int index = 0; index < inputs.size() - 1; index++) {
             buildler.addColumn(format("col_%s", index), inputs.get(index).getDeclaredType().orElse("varchar"));
         }
 
@@ -87,8 +88,17 @@ public class DruidCreateAndInsertDataSetup
 
     private boolean isTimestampDimension(ColumnSetup input)
     {
-        Set<String> timestampTypes = Set.of("timestamp(3)");
-        return timestampTypes.contains(input.getDeclaredType().orElse("varchar"));
+        if (input.getDeclaredType().isEmpty()) {
+            return false;
+        }
+        String type = input.getDeclaredType().get();
+
+        // TODO: support more types
+        if (type.startsWith("timestamp")) {
+            return true;
+        }
+
+        return false;
     }
 
     private void writeTsvFile(String dataFilePath, List<ColumnSetup> inputs)

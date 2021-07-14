@@ -17,6 +17,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Closer;
 import com.google.common.io.MoreFiles;
 import com.google.common.io.Resources;
+import io.airlift.log.Logger;
+import io.trino.plugin.druid.ingestion.IndexTaskBuilder;
 import io.trino.testing.assertions.Assert;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -52,6 +54,7 @@ import static org.testcontainers.utility.MountableFile.forHostPath;
 public class TestingDruidServer
         implements Closeable
 {
+    private static final Logger log = Logger.get(TestingDruidServer.class);
     private final String hostWorkingDirectory;
     private final GenericContainer<?> broker;
     private final GenericContainer<?> coordinator;
@@ -257,7 +260,8 @@ public class TestingDruidServer
                 .post(RequestBody.create(null, indexTask));
         Request ingestionRequest = requestBuilder.build();
 
-        try (Response ignored = httpClient.newCall(ingestionRequest).execute()) {
+        try (Response taskIdResponse = httpClient.newCall(ingestionRequest).execute()) {
+            log.info(taskIdResponse.body().string());
             Assert.assertTrue(checkDatasourceAvailable(datasource), "Datasource " + datasource + " not loaded");
         }
     }

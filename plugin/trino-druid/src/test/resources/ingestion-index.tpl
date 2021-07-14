@@ -12,10 +12,10 @@
                          "format": "${timestampSpec.format}"
                      },
                      "columns": [
+                        "${timestampSpec.column}",
                         <#list columns as column>
-                        "${column.name}",
+                        "${column.name}"<#sep>, </#sep>
                         </#list>
-                        "${timestampSpec.column}"
                      ],
                      "dimensionsSpec": {
                          "dimensions": [
@@ -32,7 +32,7 @@
              "granularitySpec": {
                  "type": "uniform",
                  "intervals": [
-                     "1992-01-02/1998-12-01"
+                     "1992-01-02/2028-12-01"
                  ],
                  "segmentGranularity": "year",
                  "queryGranularity": "day"
