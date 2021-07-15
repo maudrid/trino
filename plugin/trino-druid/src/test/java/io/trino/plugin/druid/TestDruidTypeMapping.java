@@ -20,6 +20,8 @@ import io.trino.testing.datatype.DataSetup;
 import io.trino.testing.sql.TrinoSqlExecutor;
 import org.testng.annotations.Test;
 
+import static io.trino.spi.type.BigintType.BIGINT;
+import static io.trino.spi.type.DoubleType.DOUBLE;
 import static io.trino.spi.type.TimestampType.TIMESTAMP_MILLIS;
 import static io.trino.spi.type.VarcharType.VARCHAR;
 
@@ -38,12 +40,31 @@ public class TestDruidTypeMapping
     }
 
     @Test
-    public void testTimestamp()
+    public void testTimestampAndDouble()
     {
         DruidSqlDataTypeTest.create()
                 .addRoundTrip("timestamp(3)", "2020-01-01 00:00:00.000", TIMESTAMP_MILLIS, "TIMESTAMP '2020-01-01 00:00:00.000'")
-                .addRoundTrip("string", "dummy_varchar", VARCHAR, "cast('dummy_varchar' as varchar)")
-                .execute(getQueryRunner(), trinoCreateAsSelect("time_coercion_test"));
+                .addRoundTrip("double", "1.0E100", DOUBLE, "1.0E100")
+                .addRoundTrip("double", "123.456E10", DOUBLE, "123.456E10")
+                .execute(getQueryRunner(), trinoCreateAsSelect("test_double"));
+    }
+
+    @Test
+    public void testTimestampAndVarchar()
+    {
+        DruidSqlDataTypeTest.create()
+                .addRoundTrip("timestamp(3)", "2020-01-01 00:00:00.000", TIMESTAMP_MILLIS, "TIMESTAMP '2020-01-01 00:00:00.000'")
+                .addRoundTrip("string", "dummy_varchar", VARCHAR, "cast('dummy_varchar' AS VARCHAR)")
+                .execute(getQueryRunner(), trinoCreateAsSelect("test_timestamp_varchar"));
+    }
+
+    @Test
+    public void testTimestampAndLong()
+    {
+        DruidSqlDataTypeTest.create()
+                .addRoundTrip("timestamp(3)", "2020-01-01 00:00:00.000", TIMESTAMP_MILLIS, "TIMESTAMP '2020-01-01 00:00:00.000'")
+                .addRoundTrip("long", "1000000000", BIGINT, "cast(1000000000 AS BIGINT)")
+                .execute(getQueryRunner(), trinoCreateAsSelect("test_timestamp_long"));
     }
 
     private DataSetup trinoCreateAsSelect(String dataSourceName)

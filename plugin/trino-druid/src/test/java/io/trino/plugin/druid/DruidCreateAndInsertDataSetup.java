@@ -61,18 +61,21 @@ public class DruidCreateAndInsertDataSetup
     private void ingestData(TestTable testTable, List<ColumnSetup> inputs)
             throws Exception
     {
-        IndexTaskBuilder buildler = new IndexTaskBuilder();
+        IndexTaskBuilder builder = new IndexTaskBuilder();
+        builder.setDatasource(testTable.getName());
         TimestampSpec timestampSpec = getTimestampSpec(inputs);
-        buildler.setTimestampSpec(timestampSpec);
-        buildler.setDatasource(testTable.getName());
+        builder.setTimestampSpec(timestampSpec);
+
+        List<ColumnSetup> normalInputs = inputs.stream().filter(input -> !isTimestampDimension(input)).collect(Collectors.toList());
         for (int index = 0; index < inputs.size() - 1; index++) {
-            buildler.addColumn(format("col_%s", index), inputs.get(index).getDeclaredType().orElse("varchar"));
+            builder.addColumn(format("col_%s", index), normalInputs.get(index).getDeclaredType().orElse("string"));
         }
 
         String dataFilePath = format("%s.tsv", testTable.getName());
         writeTsvFile(dataFilePath, inputs);
 
-        this.druidServer.ingestDataWithoutTaskFile(buildler.build(), dataFilePath, testTable.getName());
+        log.info(builder.build());
+        this.druidServer.ingestDataWithoutTaskFile(builder.build(), dataFilePath, testTable.getName());
     }
 
     private TimestampSpec getTimestampSpec(List<ColumnSetup> inputs)

@@ -23,7 +23,7 @@
                             {
                                 "name": "${column.name}",
                                 "type": "${column.type}"
-                            }
+                            }<#sep>,
                             </#list>
                          ]
                      }

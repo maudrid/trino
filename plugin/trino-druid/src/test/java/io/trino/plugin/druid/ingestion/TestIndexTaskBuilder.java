@@ -24,10 +24,11 @@ public class TestIndexTaskBuilder
     public void testIngestionSpec()
             throws JsonProcessingException
     {
-        String expected = "{\"type\":\"index\",\"spec\":{\"dataSchema\":{\"dataSource\":\"test_datasource\",\"parser\":{\"type\":\"string\",\"parseSpec\":{\"format\":\"tsv\",\"timestampSpec\":{\"column\":\"dummy_druid_ts\",\"format\":\"auto\"},\"columns\":[\"test_column\",\"dummy_druid_ts\"],\"dimensionsSpec\":{\"dimensions\":[{\"name\":\"test_column\",\"type\":\"varchar\"}]}}},\"granularitySpec\":{\"type\":\"uniform\",\"intervals\":[\"1992-01-02/1998-12-01\"],\"segmentGranularity\":\"year\",\"queryGranularity\":\"day\"}},\"ioConfig\":{\"type\":\"index\",\"firehose\":{\"type\":\"local\",\"baseDir\":\"/opt/druid/var/\",\"filter\":\"test_datasource.tsv\"},\"appendToExisting\":false},\"tuningConfig\":{\"type\":\"index\",\"maxRowsPerSegment\":5000000,\"maxRowsInMemory\":250000,\"segmentWriteOutMediumFactory\":{\"type\":\"offHeapMemory\"}}}}";
+        String expected = "{\"type\":\"index\",\"spec\":{\"dataSchema\":{\"dataSource\":\"test_datasource\",\"parser\":{\"type\":\"string\",\"parseSpec\":{\"format\":\"tsv\",\"timestampSpec\":{\"column\":\"dummy_druid_ts\",\"format\":\"auto\"},\"columns\":[\"dummy_druid_ts\",\"col_0\",\"col_1\"],\"dimensionsSpec\":{\"dimensions\":[{\"name\":\"col_0\",\"type\":\"string\"},{\"name\":\"col_1\",\"type\":\"long\"}]}}},\"granularitySpec\":{\"type\":\"uniform\",\"intervals\":[\"1992-01-02/2028-12-01\"],\"segmentGranularity\":\"year\",\"queryGranularity\":\"day\"}},\"ioConfig\":{\"type\":\"index\",\"firehose\":{\"type\":\"local\",\"baseDir\":\"/opt/druid/var/\",\"filter\":\"test_datasource.tsv\"},\"appendToExisting\":false},\"tuningConfig\":{\"type\":\"index\",\"maxRowsPerSegment\":5000000,\"maxRowsInMemory\":250000,\"segmentWriteOutMediumFactory\":{\"type\":\"offHeapMemory\"}}}}";
         IndexTaskBuilder builder = new IndexTaskBuilder();
         builder.setDatasource("test_datasource");
-        builder.addColumn("test_column", "varchar");
+        builder.addColumn("col_0", "string");
+        builder.addColumn("col_1", "long");
         builder.setTimestampSpec(new TimestampSpec("dummy_druid_ts", "auto"));
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode jsonNode = objectMapper.readValue(builder.build(), JsonNode.class);
