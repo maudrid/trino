@@ -33,6 +33,6 @@ public class TestIndexTaskBuilder
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode jsonNode = objectMapper.readValue(builder.build(), JsonNode.class);
 
-        assert (jsonNode.toString().equals(expected));
+        assertThat(jsonNode.toString().equals(expected));
     }
 }

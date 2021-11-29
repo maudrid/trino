@@ -133,7 +133,7 @@ public final class DruidSqlDataTypeTest
 
     private String getPredicate(int column)
     {
-        if(column == 0) {
+        if (column == 0) {
             return format("__time IS NOT DISTINCT FROM %s", testCases.get(column).getExpectedLiteral());
         }
         return format("col_%s IS NOT DISTINCT FROM %s", column - 1, testCases.get(column).getExpectedLiteral());

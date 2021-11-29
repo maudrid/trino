@@ -18,7 +18,6 @@ import com.google.common.io.Closer;
 import com.google.common.io.MoreFiles;
 import com.google.common.io.Resources;
 import io.airlift.log.Logger;
-import io.trino.plugin.druid.ingestion.IndexTaskBuilder;
 import io.trino.testing.assertions.Assert;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -29,7 +28,6 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.startupcheck.IsRunningStartupCheckStrategy;
 import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonParser;
 
 import java.io.Closeable;
 import java.io.File;
@@ -253,7 +251,8 @@ public class TestingDruidServer
         ingest(indexTask, datasource);
     }
 
-    void ingest(String indexTask, String datasource) throws IOException, InterruptedException {
+    void ingest(String indexTask, String datasource) throws IOException, InterruptedException
+    {
         Request.Builder requestBuilder = new Request.Builder();
         requestBuilder.addHeader("content-type", "application/json;charset=utf-8")
                 .url("http://localhost:" + getCoordinatorOverlordPort() + "/druid/indexer/v1/task")
