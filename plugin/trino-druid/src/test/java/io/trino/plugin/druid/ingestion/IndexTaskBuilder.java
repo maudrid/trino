@@ -79,8 +79,8 @@ public class IndexTaskBuilder
     {
         String tplContent;
         try {
-            String TMPLFILE = "ingestion-index.tpl";
-            tplContent = Resources.toString(getResource(TMPLFILE), Charset.defaultCharset());
+            String tmpFile = "ingestion-index.tpl";
+            tplContent = Resources.toString(getResource(tmpFile), Charset.defaultCharset());
             Template template = new Template("ingestion-task", new StringReader(tplContent));
             StringWriter writer = new StringWriter();
             template.process(this, writer);
